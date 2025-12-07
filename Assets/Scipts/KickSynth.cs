@@ -52,7 +52,16 @@ public class KickSynth : MonoBehaviour
             }
 
             float t = (float)(currentSample / totalSamples);
-            float freq = Mathf.Lerp(startFreq, endFreq, t); // pitch sweep
+
+            // Linear sweep
+            float linearFreq = Mathf.Lerp(startFreq, endFreq, t);
+
+            // Exponential sweep
+            float expFreq = startFreq * Mathf.Pow(endFreq / startFreq, t);
+
+            // Interpolate between linear and exponential
+            float freq = Mathf.Lerp(linearFreq, expFreq, curveAmount);
+
 
             phase += (2.0 * Mathf.PI * freq) / sampleRate;
             float sample = Mathf.Sin((float)phase) * volume; // full amplitude
