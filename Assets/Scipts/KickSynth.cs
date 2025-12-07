@@ -64,7 +64,7 @@ public class KickSynth : MonoBehaviour
 
 
             phase += (2.0 * Mathf.PI * freq) / sampleRate;
-            float sample = Mathf.Sin((float)phase) * volume; // full amplitude
+            //float sample = Mathf.Sin((float)phase) * volume;
 
             for (int ch = 0; ch < channels; ch++)
                 data[i + ch] = sample;
