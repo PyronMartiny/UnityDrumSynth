@@ -370,10 +370,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae2c7a295bb98414db2f52bdeceafdb5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KickSynth
-  startFreq: 700
-  endFreq: 5
-  durationMs: 80
+  startFreq: 22000
+  endFreq: 20
+  durationMs: 170
   volume: 1
+  exponent: 0.57
+  triggerKickButton: 0
+  riseMs: 5
+  fallMs: 20
+  dipLevelDb: -12
+  bounceMs: 50
+  fadeOutMs: 50
 --- !u!82 &951123063
 AudioSource:
   m_ObjectHideFlags: 0

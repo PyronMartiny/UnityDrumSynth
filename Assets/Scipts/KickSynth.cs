@@ -1,38 +1,92 @@
-using System.Security.Cryptography;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class KickSynth : MonoBehaviour
 {
-    [Header("Kick Paramaters")]
-    public float startFreq = 200f;
-    public float endFreq = 40f;
-    public float durationMs = 214.29f;
-    public float volume = 1.0f;
+    [Header("Kick Parameters")]
+    public float startFreq = 200f;       // Frequency at start of pitch sweep
+    public float endFreq = 40f;          // Frequency at end of pitch sweep
+    public float volume = 1.0f;          // Overall amplitude
+
+    [Header("Pitch Sweep")]
+    public float pitchSweepMs = 214.29f; // Duration of pitch sweep in ms
+    [Range(0.1f, 0.5f)]
+    public float exponent = 0.1f;        // >1 = steeper drop, <1 = slower
+
+    [Header("Amplitude Envelope (ms/dB)")]
+    public float ampDurationMs = 150f;   // Main envelope duration (rise+fall+bounce)
+    [Range(0f, 30f)] public float riseMs = 5f;       // Attack
+    [Range(0f, 100f)] public float fallMs = 20f;     // Decay to dip
+    [Range(-60f, 0f)] public float dipLevelDb = -12f;// Dip level in dB
+    [Range(0f, 100f)] public float bounceMs = 50f;   // Bounce back to full
+    [Range(0f, 200f)] public float fadeOutMs = 50f;  // Release (fade out at end)
+
+    [Header("Debug Trigger")]
+    public bool triggerKickButton = false; // Inspector button to test
 
     private double phase = 0.0;
     private double sampleRate;
-    private double totalSamples;
-    private double currentSample;
+
+    // --- Pitch sweep ---
+    private double pitchTotalSamples;
+    private double currentPitchSample;
+
+    // --- Amplitude envelope ---
+    private double ampTotalSamples;
+    private double currentAmpSample;
+    private double riseSamples;
+    private double fallSamples;
+    private double bounceSamples;
+    private double fadeOutSamples;
+    private float dipLevelLin;
+    private float ampEnvelope = 0f;
 
     private bool playing = false;
 
     void Start()
     {
         sampleRate = AudioSettings.outputSampleRate;
-        totalSamples = (durationMs / 1000.0) * sampleRate;
     }
 
     public void TriggerKick()
     {
-        currentSample = 0.0;
+        // Reset counters
+        currentPitchSample = 0;
+        currentAmpSample = 0;
+
+        // Pitch sweep total samples
+        pitchTotalSamples = (pitchSweepMs / 1000.0) * sampleRate;
+
+        // Start sine at peak
+        phase = Mathf.PI / 2.0;
+
+        // Convert dip level to linear
+        dipLevelLin = Mathf.Pow(10f, dipLevelDb / 20f);
+
+        // Scale rise/fall/bounce stages to fit ampDurationMs
+        float totalStageMs = riseMs + fallMs + bounceMs;
+        float scale = ampDurationMs / totalStageMs;
+
+        riseSamples = (riseMs * scale / 1000.0) * sampleRate;
+        fallSamples = (fallMs * scale / 1000.0) * sampleRate;
+        bounceSamples = (bounceMs * scale / 1000.0) * sampleRate;
+
+        // FadeOut / release is separate, not scaling main stages
+        fadeOutSamples = (fadeOutMs / 1000.0) * sampleRate;
+
+        ampTotalSamples = riseSamples + fallSamples + bounceSamples + fadeOutSamples;
+
         playing = true;
     }
 
     void Update()
     {
-        if (Keyboard.current.spaceKey.wasPressedThisFrame)
+        // Trigger via spacebar or inspector
+        if (Keyboard.current.spaceKey.wasPressedThisFrame || triggerKickButton)
+        {
             TriggerKick();
+            triggerKickButton = false;
+        }
     }
 
     void OnAudioFilterRead(float[] data, int channels)
@@ -42,36 +96,54 @@ public class KickSynth : MonoBehaviour
 
         for (int i = 0; i < data.Length; i += channels)
         {
-            if (currentSample >= totalSamples)
+            // Stop if amplitude envelope finished
+            if (currentAmpSample >= ampTotalSamples)
             {
-                // Fill the rest of the buffer with silence
                 for (int ch = 0; ch < channels; ch++)
                     data[i + ch] = 0f;
+
                 playing = false;
                 continue;
             }
 
-            float t = (float)(currentSample / totalSamples);
+            // --- PITCH SWEEP ---
+            float tPitch = (float)(currentPitchSample / pitchTotalSamples);
+            tPitch = Mathf.Clamp01(tPitch);
+            float tCurved = Mathf.Pow(tPitch, exponent);
+            float freq = startFreq * Mathf.Pow(endFreq / startFreq, tCurved);
 
-            // Linear sweep
-            float linearFreq = Mathf.Lerp(startFreq, endFreq, t);
+            currentPitchSample++; // Increment pitch counter
 
-            // Exponential sweep
-            float expFreq = startFreq * Mathf.Pow(endFreq / startFreq, t);
+            // --- AMPLITUDE ENVELOPE ---
+            if (currentAmpSample < riseSamples) // Attack
+                ampEnvelope = (float)(currentAmpSample / riseSamples);
+            else if (currentAmpSample < riseSamples + fallSamples) // Decay to dip
+            {
+                float t = (float)((currentAmpSample - riseSamples) / fallSamples);
+                ampEnvelope = Mathf.Lerp(1f, dipLevelLin, t);
+            }
+            else if (currentAmpSample < riseSamples + fallSamples + bounceSamples) // Bounce back
+            {
+                float t = (float)((currentAmpSample - riseSamples - fallSamples) / bounceSamples);
+                ampEnvelope = Mathf.Lerp(dipLevelLin, 1f, t);
+            }
+            else // FadeOut / Release
+            {
+                float t = (float)((currentAmpSample - riseSamples - fallSamples - bounceSamples) / fadeOutSamples);
+                ampEnvelope = Mathf.Lerp(1f, 0f, t);
+            }
 
-            // Interpolate between linear and exponential
-            float freq = Mathf.Lerp(linearFreq, expFreq, curveAmount);
+            currentAmpSample++; // Increment envelope counter
 
+            // --- GENERATE SAMPLE ---
+            float sample = Mathf.Sin((float)phase) * ampEnvelope * volume;
 
+            // Increment phase
             phase += (2.0 * Mathf.PI * freq) / sampleRate;
-            //float sample = Mathf.Sin((float)phase) * volume;
 
+            // Write sample to all channels
             for (int ch = 0; ch < channels; ch++)
                 data[i + ch] = sample;
-
-            currentSample++;
         }
     }
-
-
 }
