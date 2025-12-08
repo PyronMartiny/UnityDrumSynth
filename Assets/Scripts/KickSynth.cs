@@ -6,20 +6,20 @@ public class KickSynth : MonoBehaviour
     [Header("Kick Parameters")]
     public float startFreq = 200f;       // Frequency at start of pitch sweep
     public float endFreq = 40f;          // Frequency at end of pitch sweep
-    public float volume = 1.0f;          // Overall amplitude
+    [Range(0.1f, 1.0f)] public float volume = 1.0f;          // Overall amplitude
 
     [Header("Pitch Sweep")]
-    public float pitchSweepMs = 214.29f; // Duration of pitch sweep in ms
+    [Range(10f, 400f)] public float pitchSweepMs = 214.29f; // Duration of pitch sweep in ms
     [Range(0.1f, 0.5f)]
-    public float exponent = 0.1f;        // >1 = steeper drop, <1 = slower
+    public float pitchCurve = 0.1f;        // >1 = steeper drop, <1 = slower
 
     [Header("Amplitude Envelope (ms/dB)")]
-    public float ampDurationMs = 150f;   // Main envelope duration (rise+fall+bounce)
+    [Range(10f, 400f)] public float ampDurationMs = 180f;   // Main envelope duration (rise+fall+bounce)
     [Range(0f, 30f)] public float riseMs = 5f;       // Attack
-    [Range(0f, 100f)] public float fallMs = 20f;     // Decay to dip
-    [Range(-60f, 0f)] public float dipLevelDb = -12f;// Dip level in dB
-    [Range(0f, 100f)] public float bounceMs = 50f;   // Bounce back to full
-    [Range(0f, 200f)] public float fadeOutMs = 50f;  // Release (fade out at end)
+    [Range(1, 100f)] public float fallMs = 20f;     // Decay to dip
+    [Range(-24f, 0f)] public float dipLevelDb = -12f;// Dip level in dB
+    [Range(1f, 100f)] public float bounceMs = 50f;   // Bounce back to full
+    [Range(5f, 200f)] public float fadeOutMs = 50f;  // Release (fade out at end)
 
     [Header("Debug Trigger")]
     public bool triggerKickButton = false; // Inspector button to test
@@ -94,6 +94,8 @@ public class KickSynth : MonoBehaviour
         if (!playing)
             return;
 
+        int oversample = 4; // 4x oversampling to avoid aliasing
+
         for (int i = 0; i < data.Length; i += channels)
         {
             // Stop if amplitude envelope finished
@@ -106,44 +108,50 @@ public class KickSynth : MonoBehaviour
                 continue;
             }
 
-            // --- PITCH SWEEP ---
-            float tPitch = (float)(currentPitchSample / pitchTotalSamples);
-            tPitch = Mathf.Clamp01(tPitch);
-            float tCurved = Mathf.Pow(tPitch, exponent);
-            float freq = startFreq * Mathf.Pow(endFreq / startFreq, tCurved);
+            float sampleSum = 0f;
 
-            currentPitchSample++; // Increment pitch counter
+            for (int os = 0; os < oversample; os++)
+            {   
+                // --- PITCH SWEEP ---
+                float tPitch = (float)(currentPitchSample / pitchTotalSamples);
+                tPitch = Mathf.Clamp01(tPitch);
+                float tCurved = Mathf.Pow(tPitch, pitchCurve);
+                float freq = startFreq * Mathf.Pow(endFreq / startFreq, tCurved);
 
-            // --- AMPLITUDE ENVELOPE ---
-            if (currentAmpSample < riseSamples) // Attack
-                ampEnvelope = (float)(currentAmpSample / riseSamples);
-            else if (currentAmpSample < riseSamples + fallSamples) // Decay to dip
-            {
-                float t = (float)((currentAmpSample - riseSamples) / fallSamples);
-                ampEnvelope = Mathf.Lerp(1f, dipLevelLin, t);
+                //currentPitchSample++; // Increment pitch counter
+
+                // --- AMPLITUDE ENVELOPE ---
+                if (currentAmpSample < riseSamples) // Attack
+                    ampEnvelope = (float)(currentAmpSample / riseSamples);
+                else if (currentAmpSample < riseSamples + fallSamples) // Decay to dip
+                {
+                    float t = (float)((currentAmpSample - riseSamples) / fallSamples);
+                    ampEnvelope = Mathf.Lerp(1f, dipLevelLin, t);
+                }
+                else if (currentAmpSample < riseSamples + fallSamples + bounceSamples) // Bounce back
+                {
+                    float t = (float)((currentAmpSample - riseSamples - fallSamples) / bounceSamples);
+                    ampEnvelope = Mathf.Lerp(dipLevelLin, 1f, t);
+                }
+                else // FadeOut / Release
+                {
+                    float t = (float)((currentAmpSample - riseSamples - fallSamples - bounceSamples) / fadeOutSamples);
+                    ampEnvelope = Mathf.Lerp(1f, 0f, t);
+                }
+                sampleSum += Mathf.Sin((float)phase) * ampEnvelope;
+
+
+                // Increment phase
+                phase += (2.0 * Mathf.PI * freq) / (sampleRate * oversample);
+                currentPitchSample += 1.0 / oversample;
+                currentAmpSample += 1.0 / oversample;
             }
-            else if (currentAmpSample < riseSamples + fallSamples + bounceSamples) // Bounce back
-            {
-                float t = (float)((currentAmpSample - riseSamples - fallSamples) / bounceSamples);
-                ampEnvelope = Mathf.Lerp(dipLevelLin, 1f, t);
-            }
-            else // FadeOut / Release
-            {
-                float t = (float)((currentAmpSample - riseSamples - fallSamples - bounceSamples) / fadeOutSamples);
-                ampEnvelope = Mathf.Lerp(1f, 0f, t);
-            }
 
-            currentAmpSample++; // Increment envelope counter
-
-            // --- GENERATE SAMPLE ---
-            float sample = Mathf.Sin((float)phase) * ampEnvelope * volume;
-
-            // Increment phase
-            phase += (2.0 * Mathf.PI * freq) / sampleRate;
+            float finalSample = sampleSum / oversample * volume;
 
             // Write sample to all channels
             for (int ch = 0; ch < channels; ch++)
-                data[i + ch] = sample;
+                data[i + ch] = finalSample;
         }
     }
 }
