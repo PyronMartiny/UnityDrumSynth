@@ -13,7 +13,63 @@
         <ui:VisualElement name="ScopeContainer" class="oscilloscope">
             <ui:Image name="ScopeImage" class="oscilloscope-image"/>
         </ui:VisualElement>
-        <ui:Label name="VolumeLabel" text="Volume" class="label"/>
-        <ui:VisualElement name="VolumeSlider" class="slider"/>
+        <ui:VisualElement name="FaderRow" class="fader-row">
+            <ui:VisualElement name="FaderColumn1" class="fader-column">
+                <ui:Label name="AmpDurationFaderLabel" text="Amp Duration" class="label"/>
+                <ui:VisualElement name="AmpDurationFader" class="slider">
+                    <ui:VisualElement name="AmpDurationFaderHitArea" class="slider-hit-area">
+                        <ui:VisualElement name="AmpDurationFaderCrossbar" class="slider-crossbar"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="FaderColumn4" class="fader-column">
+                <ui:Label name="RiseFaderLabel" text="Rise" class="label"/>
+                <ui:VisualElement name="RiseFader" class="slider">
+                    <ui:VisualElement name="RiseFaderHitArea" class="slider-hit-area">
+                        <ui:VisualElement name="RiseFaderCrossbar" class="slider-crossbar"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="FaderColumn5" class="fader-column">
+                <ui:Label name="FallFaderLabel" text="Fall" class="label"/>
+                <ui:VisualElement name="FallFader" class="slider">
+                    <ui:VisualElement name="FallFaderHitArea" class="slider-hit-area">
+                        <ui:VisualElement name="FallFaderCrossbar" class="slider-crossbar"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="FaderColumn6" class="fader-column">
+                <ui:Label name="DipFaderLabel" text="Dip Level" class="label"/>
+                <ui:VisualElement name="DipFader" class="slider">
+                    <ui:VisualElement name="DipFaderHitArea" class="slider-hit-area">
+                        <ui:VisualElement name="DipFaderCrossbar" class="slider-crossbar"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="FaderColumn7" class="fader-column">
+                <ui:Label name="BounceFaderLabel" text="Bounce" class="label"/>
+                <ui:VisualElement name="BounceFader" class="slider">
+                    <ui:VisualElement name="BounceFaderHitArea" class="slider-hit-area">
+                        <ui:VisualElement name="BounceFaderCrossbar" class="slider-crossbar"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="FaderColumn8" class="fader-column">
+                <ui:Label name="FadeOutFaderLabel" text="Fade Out" class="label"/>
+                <ui:VisualElement name="FadeOutFader" class="slider">
+                    <ui:VisualElement name="FadeOutFaderHitArea" class="slider-hit-area">
+                        <ui:VisualElement name="FadeOutFaderCrossbar" class="slider-crossbar"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="FaderColumn9" class="fader-column">
+                <ui:Label name="VolumeLabel" text="Volume" class="label"/>
+                <ui:VisualElement name="VolumeSlider" class="slider">
+                    <ui:VisualElement name="VolumeSliderHitArea" class="slider-hit-area">
+                        <ui:VisualElement name="VolumeSliderCrossbar" class="slider-crossbar"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

@@ -18,7 +18,7 @@ public class KickSynth : MonoBehaviour
 
     [Header("Amplitude Envelope (ms/dB)")]
     [Range(10f, 400f)] public float ampDurationMs = 180f;   // Main envelope duration (rise+fall+bounce)
-    [Range(0f, 30f)] public float riseMs = 5f;       // Attack
+    [Range(0f, 20f)] public float riseMs = 5f;       // Attack
     [Range(1, 100f)] public float fallMs = 20f;     // Decay to dip
     [Range(-24f, 0f)] public float dipLevelDb = -12f;// Dip level in dB
     [Range(1f, 100f)] public float bounceMs = 50f;   // Bounce back to full
@@ -43,6 +43,10 @@ public class KickSynth : MonoBehaviour
     private double fadeOutSamples;
     private float dipLevelLin;
     private float ampEnvelope = 0f;
+    private double riseEnd;
+    private double fallEnd;
+    private double bounceEnd;
+    private double fadeEnd;
 
     private bool playing = false;
 
@@ -73,18 +77,28 @@ public class KickSynth : MonoBehaviour
         // Convert dip level to linear
         dipLevelLin = Mathf.Pow(10f, dipLevelDb / 20f);
 
-        // Scale rise/fall/bounce stages to fit ampDurationMs
-        float totalStageMs = riseMs + fallMs + bounceMs;
-        float scale = ampDurationMs / totalStageMs;
-
-        riseSamples = (riseMs * scale / 1000.0) * sampleRate;
-        fallSamples = (fallMs * scale / 1000.0) * sampleRate;
-        bounceSamples = (bounceMs * scale / 1000.0) * sampleRate;
-
-        // FadeOut / release is separate, not scaling main stages
+        // All stages are independent and use their raw ms values
+        // They are sequential: rise -> fall -> bounce (each starts when previous ends)
+        riseSamples = (riseMs / 1000.0) * sampleRate;
+        fallSamples = (fallMs / 1000.0) * sampleRate;
+        bounceSamples = (bounceMs / 1000.0) * sampleRate;
         fadeOutSamples = (fadeOutMs / 1000.0) * sampleRate;
 
-        ampTotalSamples = riseSamples + fallSamples + bounceSamples + fadeOutSamples;
+        // Define stage end positions for envelope
+        riseEnd = riseSamples;
+        fallEnd = riseEnd + fallSamples;
+        bounceEnd = fallEnd + bounceSamples;
+
+        // ampDurationMs: signal plays at full gain (1.0) after bounce until this point
+        double ampDurationSamples = (ampDurationMs / 1000.0) * sampleRate;
+
+        // fadeOutMs: release stage added AFTER ampDurationMs completes (like synth release)
+        // Fades from 1.0 to 0.0 over fadeOutMs
+        fadeEnd = ampDurationSamples + fadeOutSamples;
+
+        // Total playback = ampDurationMs + fadeOutMs
+        ampTotalSamples = fadeEnd;
+
 
         // Reset oscilloscope buffer and notify listeners for sync
         lock (scopeLock)
@@ -146,23 +160,39 @@ public class KickSynth : MonoBehaviour
                 //currentPitchSample++; // Increment pitch counter
 
                 // --- AMPLITUDE ENVELOPE ---
-                if (currentAmpSample < riseSamples) // Attack
-                    ampEnvelope = (float)(currentAmpSample / riseSamples);
-                else if (currentAmpSample < riseSamples + fallSamples) // Decay to dip
+                double ampDurationSamples = (ampDurationMs / 1000.0) * sampleRate;
+                
+                if (currentAmpSample < riseEnd)
                 {
-                    float t = (float)((currentAmpSample - riseSamples) / fallSamples);
+                    ampEnvelope = (float)(currentAmpSample / riseSamples);
+                }
+                else if (currentAmpSample < fallEnd)
+                {
+                    float t = (float)((currentAmpSample - riseEnd) / fallSamples);
                     ampEnvelope = Mathf.Lerp(1f, dipLevelLin, t);
                 }
-                else if (currentAmpSample < riseSamples + fallSamples + bounceSamples) // Bounce back
+                else if (currentAmpSample < bounceEnd)
                 {
-                    float t = (float)((currentAmpSample - riseSamples - fallSamples) / bounceSamples);
+                    float t = (float)((currentAmpSample - fallEnd) / bounceSamples);
                     ampEnvelope = Mathf.Lerp(dipLevelLin, 1f, t);
                 }
-                else // FadeOut / Release
+                else if (currentAmpSample < ampDurationSamples)
                 {
-                    float t = (float)((currentAmpSample - riseSamples - fallSamples - bounceSamples) / fadeOutSamples);
+                    // After bounce, hold at full gain (1.0) until ampDurationMs completes
+                    ampEnvelope = 1f;
+                }
+                else if (currentAmpSample < fadeEnd)
+                {
+                    // Release stage: fadeOut starts AFTER ampDurationMs, fades from 1.0 to 0.0
+                    float t = (float)((currentAmpSample - ampDurationSamples) / fadeOutSamples);
                     ampEnvelope = Mathf.Lerp(1f, 0f, t);
                 }
+                else
+                {
+                    ampEnvelope = 0f;
+                }
+
+
                 sampleSum += Mathf.Sin((float)phase) * ampEnvelope;
 
 
@@ -215,89 +245,120 @@ public class KickSynth : MonoBehaviour
     /// Generate a full preview of the kick waveform using current parameters (offline),
     /// resampled to a fixed output length for consistent drawing.
     /// </summary>
-    public float[] GeneratePreviewWaveform(int outputSamples = 2048)
-    {
-        double sr = sampleRate > 0 ? sampleRate : AudioSettings.outputSampleRate;
-        if (sr <= 0) return System.Array.Empty<float>();
-
-        int oversample = 4;
-
-        double localPitchTotalSamples = (pitchSweepMs / 1000.0) * sr;
-
-        float totalStageMs = riseMs + fallMs + bounceMs;
-        float scale = ampDurationMs / Mathf.Max(1e-6f, totalStageMs);
-
-        double localRise = (riseMs * scale / 1000.0) * sr;
-        double localFall = (fallMs * scale / 1000.0) * sr;
-        double localBounce = (bounceMs * scale / 1000.0) * sr;
-        double localFade = (fadeOutMs / 1000.0) * sr;
-        double localAmpTotal = localRise + localFall + localBounce + localFade;
-
-        double localPhase = Mathf.PI / 2.0;
-        double localPitchSample = 0;
-        double localAmpSample = 0;
-        float localDip = Mathf.Pow(10f, dipLevelDb / 20f);
-
-        var list = new System.Collections.Generic.List<float>();
-        float previewAmpEnv = 0f; // local to avoid touching shared ampEnvelope
-
-        // Generate full waveform at oversampled resolution
-        while (localAmpSample < localAmpTotal)
+        public float[] GeneratePreviewWaveform(int outputSamples = 8192)
         {
-            float sampleSum = 0f;
-            for (int os = 0; os < oversample; os++)
+            double sr = sampleRate > 0 ? sampleRate : AudioSettings.outputSampleRate;
+            if (sr <= 0) return System.Array.Empty<float>();
+
+            int oversample = 4;
+
+            // --- Calculate pitch sweep ---
+            double localPitchTotalSamples = (pitchSweepMs / 1000.0) * sr;
+
+            // --- Calculate amplitude envelope stages ---
+            // All stages are independent and use their raw ms values
+            // They are sequential: rise -> fall -> bounce (each starts when previous ends)
+            double localRise = (riseMs / 1000.0) * sr;
+            double localFall = (fallMs / 1000.0) * sr;
+            double localBounce = (bounceMs / 1000.0) * sr;
+            double localFade = (fadeOutMs / 1000.0) * sr;
+
+            // Stage end positions
+            double riseEnd = localRise;
+            double fallEnd = riseEnd + localFall;
+            double bounceEnd = fallEnd + localBounce;
+
+            // ampDurationMs: signal plays at full gain (1.0) after bounce until this point
+            double localAmpDurationSamples = (ampDurationMs / 1000.0) * sr;
+
+            // fadeOutMs: release stage added AFTER ampDurationMs completes (like synth release)
+            // Fades from 1.0 to 0.0 over fadeOutMs
+            double fadeEnd = localAmpDurationSamples + localFade;
+
+            // Total playback = ampDurationMs + fadeOutMs
+            double localAmpTotal = fadeEnd;
+
+            double localPhase = Mathf.PI / 2.0; // Start sine at peak
+            double localPitchSample = 0;
+            double localAmpSample = 0;
+            float localDip = Mathf.Pow(10f, dipLevelDb / 20f);
+
+            var list = new System.Collections.Generic.List<float>();
+            float previewAmpEnv = 0f; // local to avoid touching shared ampEnvelope
+
+            // Generate full waveform at oversampled resolution
+            while (localAmpSample < localAmpTotal)
             {
-                float tPitch = (float)(localPitchSample / localPitchTotalSamples);
-                tPitch = Mathf.Clamp01(tPitch);
-                float tCurved = Mathf.Pow(tPitch, pitchCurve);
-                float freq = startFreq * Mathf.Pow(endFreq / startFreq, tCurved);
+                float sampleSum = 0f;
 
-                // Amplitude envelope
-                if (localAmpSample < localRise) // Attack
-                    previewAmpEnv = (float)(localAmpSample / localRise);
-                else if (localAmpSample < localRise + localFall) // Decay to dip
+                for (int os = 0; os < oversample; os++)
                 {
-                    float t = (float)((localAmpSample - localRise) / localFall);
-                    previewAmpEnv = Mathf.Lerp(1f, localDip, t);
-                }
-                else if (localAmpSample < localRise + localFall + localBounce) // Bounce back
-                {
-                    float t = (float)((localAmpSample - localRise - localFall) / localBounce);
-                    previewAmpEnv = Mathf.Lerp(localDip, 1f, t);
-                }
-                else // FadeOut / Release
-                {
-                    float t = (float)((localAmpSample - localRise - localFall - localBounce) / localFade);
-                    previewAmpEnv = Mathf.Lerp(1f, 0f, t);
+                    float tPitch = (float)(localPitchSample / localPitchTotalSamples);
+                    tPitch = Mathf.Clamp01(tPitch);
+                    float tCurved = Mathf.Pow(tPitch, pitchCurve);
+                    float freq = startFreq * Mathf.Pow(endFreq / startFreq, tCurved);
+
+                    // --- Amplitude Envelope using stage ends ---
+                    if (localAmpSample < riseEnd)
+                    {
+                        previewAmpEnv = (float)(localAmpSample / localRise);
+                    }
+                    else if (localAmpSample < fallEnd)
+                    {
+                        float t = (float)((localAmpSample - riseEnd) / localFall);
+                        previewAmpEnv = Mathf.Lerp(1f, localDip, t);
+                    }
+                    else if (localAmpSample < bounceEnd)
+                    {
+                        float t = (float)((localAmpSample - fallEnd) / localBounce);
+                        previewAmpEnv = Mathf.Lerp(localDip, 1f, t);
+                    }
+                    else if (localAmpSample < localAmpDurationSamples)
+                    {
+                        // After bounce, hold at full gain (1.0) until ampDurationMs completes
+                        previewAmpEnv = 1f;
+                    }
+                    else if (localAmpSample < fadeEnd)
+                    {
+                        // Release stage: fadeOut starts AFTER ampDurationMs, fades from 1.0 to 0.0
+                        float t = (float)((localAmpSample - localAmpDurationSamples) / localFade);
+                        previewAmpEnv = Mathf.Lerp(1f, 0f, t);
+                    }
+                    else
+                    {
+                        previewAmpEnv = 0f;
+                    }
+
+                    sampleSum += Mathf.Sin((float)localPhase) * previewAmpEnv;
+
+                    // Increment phase and counters
+                    localPhase += (2.0 * Mathf.PI * freq) / (sr * oversample);
+                    localPitchSample += 1.0 / oversample;
+                    localAmpSample += 1.0 / oversample;
                 }
 
-                sampleSum += Mathf.Sin((float)localPhase) * previewAmpEnv;
-
-                localPhase += (2.0 * Mathf.PI * freq) / (sr * oversample);
-                localPitchSample += 1.0 / oversample;
-                localAmpSample += 1.0 / oversample;
+                float finalSample = sampleSum / oversample * volume;
+                list.Add(finalSample);
             }
 
-            float finalSample = sampleSum / oversample * volume;
-            list.Add(finalSample);
+            // Resample to fixed output length
+            if (list.Count == 0 || outputSamples <= 1)
+                return new float[outputSamples > 0 ? outputSamples : 0];
+
+            var outArr = new float[outputSamples];
+            int srcCount = list.Count;
+
+            for (int i = 0; i < outputSamples; i++)
+            {
+                float t = (outputSamples == 1) ? 0f : i / (float)(outputSamples - 1);
+                float srcPos = t * (srcCount - 1);
+                int idx0 = Mathf.FloorToInt(srcPos);
+                int idx1 = Mathf.Min(idx0 + 1, srcCount - 1);
+                float frac = srcPos - idx0;
+                outArr[i] = Mathf.Lerp(list[idx0], list[idx1], frac);
+            }
+
+            return outArr;
         }
 
-        // Resample to fixed output length
-        if (list.Count == 0 || outputSamples <= 1)
-            return new float[outputSamples > 0 ? outputSamples : 0];
-
-        var outArr = new float[outputSamples];
-        int srcCount = list.Count;
-        for (int i = 0; i < outputSamples; i++)
-        {
-            float t = (outputSamples == 1) ? 0f : i / (float)(outputSamples - 1);
-            float srcPos = t * (srcCount - 1);
-            int idx0 = Mathf.FloorToInt(srcPos);
-            int idx1 = Mathf.Min(idx0 + 1, srcCount - 1);
-            float frac = srcPos - idx0;
-            outArr[i] = Mathf.Lerp(list[idx0], list[idx1], frac);
-        }
-
-        return outArr;
-    }
 }

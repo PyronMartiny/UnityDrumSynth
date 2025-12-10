@@ -1,6 +1,6 @@
 .kick-panel {
-    width: 800px;
-    height: 600px;
+    width: 66.67%;
+    height: 66.67%;
     padding: 12px;
 
     background-color: #222;
@@ -9,14 +9,12 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-
-    row-gap: 10px; /* space between elements */
 }
 
 .label {
     color: white;
     font-size: 14px;
-    unity-text-align: middle-center;
+    -unity-text-align: middle-center;
 }
 
 .knob {
@@ -37,31 +35,75 @@
     left: 50%;
     translate: -50% 0;
     border-radius: 2px;
-
-    /* optional: add shadow for contrast */
-    box-shadow: 0 0 2px rgba(255,255,255,0.5);
 }
 
 .slider {
-    width: 200px;
-    height: 30px;
+    width: 4px;   /* thin vertical track */
+    height: 120px; /* 2/3 of original height */
+    background-color: #ffd400; /* same yellow as knobs */
+    position: relative;
+    border-radius: 2px;
+}
 
-    background-color: rgb(50,200,50);
+.slider-hit-area {
+    width: 40px;  /* larger invisible hit area */
+    height: 20px; /* larger invisible hit area */
+    position: absolute;
+    top: 0%;
+    left: 0%;
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.slider-crossbar {
+    width: 6px;  
+    height: 6px;  /* same thickness as knob-indicator width - matches fader track width */
+    background-color: black;
+    border-radius: 6px;
+    position: relative;
 }
 
 .oscilloscope {
-    width: 520px;
+    width: 1040px;
     height: 160px;
     padding: 8px;
     background-color: #111;
-    border: 1px solid #333;
+    border-width: 1px;
+    border-color: #333;
     border-radius: 6px;
     align-items: center;
     justify-content: center;
 }
 
 .oscilloscope-image {
-    width: 512px;
+    width: 1024px;
     height: 128px;
     background-color: #080808;
+}
+
+.fader-row {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-evenly;
+    height: auto;
+    min-height: 0;
+    width: 100%;
+    padding-left: 10%;
+    padding-right: 10%;
+}
+
+.fader-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: auto;
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.fader-column .label {
+    margin-bottom: 6px;
 }

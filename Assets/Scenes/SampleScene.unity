@@ -365,6 +365,12 @@ GameObject:
   - component: {fileID: 733724349}
   - component: {fileID: 733724350}
   - component: {fileID: 733724351}
+  - component: {fileID: 733724352}
+  - component: {fileID: 733724357}
+  - component: {fileID: 733724356}
+  - component: {fileID: 733724355}
+  - component: {fileID: 733724354}
+  - component: {fileID: 733724353}
   m_Layer: 5
   m_Name: KickSynthUI
   m_TagString: Untagged
@@ -461,11 +467,11 @@ MonoBehaviour:
   uiDocument: {fileID: 733724347}
   imageName: ScopeImage
   kickSynth: {fileID: 40883957}
-  textureWidth: 512
+  textureWidth: 1024
   textureHeight: 128
   background: {r: 0.08, g: 0.08, b: 0.08, a: 1}
-  lineColor: {r: 0, g: 0.9, b: 0.4, a: 1}
-  midLineColor: {r: 0, g: 0, b: 0, a: 0.4}
+  lineColor: {r: 1, g: 0.8313726, b: 0, a: 1}
+  midLineColor: {r: 0.078431375, g: 0.078431375, b: 0.078431375, a: 1}
   refreshInterval: 0.1
 --- !u!114 &733724351
 MonoBehaviour:
@@ -480,7 +486,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Fader
   uiDocument: {fileID: 733724347}
-  faderName: AmpFader
+  faderName: VolumeSlider
   kickSynth: {fileID: 40883957}
   controlAmpDurationMs: 0
   controlRiseMs: 0
@@ -489,6 +495,144 @@ MonoBehaviour:
   controlBounceMs: 0
   controlFadeOutMs: 0
   controlVolume: 1
+  value: 0
+--- !u!114 &733724352
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 733724345}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 117456da71c8dc04ea830a727fcac220, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Fader
+  uiDocument: {fileID: 733724347}
+  faderName: FadeOutFader
+  kickSynth: {fileID: 40883957}
+  controlAmpDurationMs: 0
+  controlRiseMs: 0
+  controlFallMs: 0
+  controlDipLevelDb: 0
+  controlBounceMs: 0
+  controlFadeOutMs: 1
+  controlVolume: 0
+  value: 0
+--- !u!114 &733724353
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 733724345}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 117456da71c8dc04ea830a727fcac220, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Fader
+  uiDocument: {fileID: 733724347}
+  faderName: AmpDurationFader
+  kickSynth: {fileID: 40883957}
+  controlAmpDurationMs: 1
+  controlRiseMs: 0
+  controlFallMs: 0
+  controlDipLevelDb: 0
+  controlBounceMs: 0
+  controlFadeOutMs: 0
+  controlVolume: 0
+  value: 0
+--- !u!114 &733724354
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 733724345}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 117456da71c8dc04ea830a727fcac220, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Fader
+  uiDocument: {fileID: 733724347}
+  faderName: RiseFader
+  kickSynth: {fileID: 40883957}
+  controlAmpDurationMs: 0
+  controlRiseMs: 1
+  controlFallMs: 0
+  controlDipLevelDb: 0
+  controlBounceMs: 0
+  controlFadeOutMs: 0
+  controlVolume: 0
+  value: 0
+--- !u!114 &733724355
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 733724345}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 117456da71c8dc04ea830a727fcac220, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Fader
+  uiDocument: {fileID: 733724347}
+  faderName: FallFader
+  kickSynth: {fileID: 40883957}
+  controlAmpDurationMs: 0
+  controlRiseMs: 0
+  controlFallMs: 1
+  controlDipLevelDb: 0
+  controlBounceMs: 0
+  controlFadeOutMs: 0
+  controlVolume: 0
+  value: 0
+--- !u!114 &733724356
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 733724345}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 117456da71c8dc04ea830a727fcac220, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Fader
+  uiDocument: {fileID: 733724347}
+  faderName: DipFader
+  kickSynth: {fileID: 40883957}
+  controlAmpDurationMs: 0
+  controlRiseMs: 0
+  controlFallMs: 0
+  controlDipLevelDb: 1
+  controlBounceMs: 0
+  controlFadeOutMs: 0
+  controlVolume: 0
+  value: 0
+--- !u!114 &733724357
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 733724345}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 117456da71c8dc04ea830a727fcac220, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Fader
+  uiDocument: {fileID: 733724347}
+  faderName: BounceFader
+  kickSynth: {fileID: 40883957}
+  controlAmpDurationMs: 0
+  controlRiseMs: 0
+  controlFallMs: 0
+  controlDipLevelDb: 0
+  controlBounceMs: 1
+  controlFadeOutMs: 0
+  controlVolume: 0
   value: 0
 --- !u!1001 &8950805665984512921
 PrefabInstance:
@@ -528,7 +672,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5156960162136137786, guid: 0133a28473110814087e7ce9133c4d44, type: 3}
       propertyPath: ampDurationMs
-      value: 132
+      value: 400
       objectReference: {fileID: 0}
     - target: {fileID: 8407935305154247387, guid: 0133a28473110814087e7ce9133c4d44, type: 3}
       propertyPath: m_LocalPosition.x

@@ -8,8 +8,8 @@ public class Oscilloscope : MonoBehaviour
     public KickSynth kickSynth;
 
     [Header("Display")]
-    public int textureWidth = 512;
-    public int textureHeight = 128;
+    public int textureWidth = 2048;
+    public int textureHeight = 256;
     public Color background = new Color(0.08f, 0.08f, 0.08f, 1f);
     public Color lineColor = new Color(0f, 0.9f, 0.4f, 1f);
     public Color midLineColor = new Color(0f, 0f, 0f, 0.4f);

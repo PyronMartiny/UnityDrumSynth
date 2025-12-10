@@ -1,0 +1,139 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\kyron\\Kick Drum\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|c:\\users\\kyron\\kick drum\\assets\\scripts\\oscilloscope.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\oscilloscope.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|c:\\users\\kyron\\kick drum\\assets\\ui\\kicksynthstyles.uss||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|solutionrelative:assets\\ui\\kicksynthstyles.uss||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|c:\\users\\kyron\\kick drum\\assets\\scripts\\kicksynth.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\kicksynth.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|c:\\users\\kyron\\kick drum\\assets\\scripts\\fader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\fader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|c:\\users\\kyron\\kick drum\\assets\\scripts\\kicksynthgui.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\kicksynthgui.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|c:\\users\\kyron\\kick drum\\assets\\scripts\\knob.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\knob.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|c:\\users\\kyron\\kick drum\\assets\\ui\\kicksynthgui.uxml||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|solutionrelative:assets\\ui\\kicksynthgui.uxml||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "KickSynth.cs",
+              "DocumentMoniker": "C:\\Users\\kyron\\Kick Drum\\Assets\\Scripts\\KickSynth.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\KickSynth.cs",
+              "ToolTip": "C:\\Users\\kyron\\Kick Drum\\Assets\\Scripts\\KickSynth.cs",
+              "RelativeToolTip": "Assets\\Scripts\\KickSynth.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACwBAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-10T14:30:04.784Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Fader.cs",
+              "DocumentMoniker": "C:\\Users\\kyron\\Kick Drum\\Assets\\Scripts\\Fader.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Fader.cs",
+              "ToolTip": "C:\\Users\\kyron\\Kick Drum\\Assets\\Scripts\\Fader.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Fader.cs",
+              "ViewState": "AgIAAFQAAAAAAAAAAAAIwDYAAAAyAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-10T14:15:27.808Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Oscilloscope.cs",
+              "DocumentMoniker": "C:\\Users\\kyron\\Kick Drum\\Assets\\Scripts\\Oscilloscope.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Oscilloscope.cs",
+              "ToolTip": "C:\\Users\\kyron\\Kick Drum\\Assets\\Scripts\\Oscilloscope.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Oscilloscope.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-10T10:09:28.115Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "KickSynthStyles.uss",
+              "DocumentMoniker": "C:\\Users\\kyron\\Kick Drum\\Assets\\UI\\KickSynthStyles.uss",
+              "RelativeDocumentMoniker": "Assets\\UI\\KickSynthStyles.uss",
+              "ToolTip": "C:\\Users\\kyron\\Kick Drum\\Assets\\UI\\KickSynthStyles.uss",
+              "RelativeToolTip": "Assets\\UI\\KickSynthStyles.uss",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-12-10T07:37:23.712Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "KickSynthGUI.uxml",
+              "DocumentMoniker": "C:\\Users\\kyron\\Kick Drum\\Assets\\UI\\KickSynthGUI.uxml",
+              "RelativeDocumentMoniker": "Assets\\UI\\KickSynthGUI.uxml",
+              "ToolTip": "C:\\Users\\kyron\\Kick Drum\\Assets\\UI\\KickSynthGUI.uxml",
+              "RelativeToolTip": "Assets\\UI\\KickSynthGUI.uxml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAbAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003576|",
+              "WhenOpened": "2025-12-10T08:23:48.732Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Knob.cs",
+              "DocumentMoniker": "C:\\Users\\kyron\\Kick Drum\\Assets\\Scripts\\Knob.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Knob.cs",
+              "ToolTip": "C:\\Users\\kyron\\Kick Drum\\Assets\\Scripts\\Knob.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Knob.cs",
+              "ViewState": "AgIAABcAAAAAAAAAAADwvx4AAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-10T07:47:54.347Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "KickSynthGUI.cs",
+              "DocumentMoniker": "C:\\Users\\kyron\\Kick Drum\\Assets\\Scripts\\KickSynthGUI.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\KickSynthGUI.cs",
+              "ToolTip": "C:\\Users\\kyron\\Kick Drum\\Assets\\Scripts\\KickSynthGUI.cs",
+              "RelativeToolTip": "Assets\\Scripts\\KickSynthGUI.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-09T09:46:02.231Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
