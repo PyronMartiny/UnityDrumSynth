@@ -1,0 +1,67 @@
+.kick-panel {
+    width: 800px;
+    height: 600px;
+    padding: 12px;
+
+    background-color: #222;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+
+    row-gap: 10px; /* space between elements */
+}
+
+.label {
+    color: white;
+    font-size: 14px;
+    unity-text-align: middle-center;
+}
+
+.knob {
+    width: 100px;
+    height: 100px;
+    background-color: #ffd400; /* base color */
+    border-radius: 50%;        /* circle */
+    position: relative;
+}
+
+
+.knob-indicator {
+    width: 4px;
+    height: 28px;
+    background-color: black;
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    translate: -50% 0;
+    border-radius: 2px;
+
+    /* optional: add shadow for contrast */
+    box-shadow: 0 0 2px rgba(255,255,255,0.5);
+}
+
+.slider {
+    width: 200px;
+    height: 30px;
+
+    background-color: rgb(50,200,50);
+}
+
+.oscilloscope {
+    width: 520px;
+    height: 160px;
+    padding: 8px;
+    background-color: #111;
+    border: 1px solid #333;
+    border-radius: 6px;
+    align-items: center;
+    justify-content: center;
+}
+
+.oscilloscope-image {
+    width: 512px;
+    height: 128px;
+    background-color: #080808;
+}

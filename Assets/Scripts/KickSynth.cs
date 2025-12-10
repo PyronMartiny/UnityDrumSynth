@@ -3,6 +3,9 @@ using UnityEngine.InputSystem;
 
 public class KickSynth : MonoBehaviour
 {
+    public System.Action onKickStart;
+    public System.Action<float[]> onKickComplete; // optional for snapshot consumers
+
     [Header("Kick Parameters")]
     public float startFreq = 200f;       // Frequency at start of pitch sweep
     public float endFreq = 40f;          // Frequency at end of pitch sweep
@@ -43,6 +46,13 @@ public class KickSynth : MonoBehaviour
 
     private bool playing = false;
 
+    // --- Oscilloscope buffer ---
+    private readonly object scopeLock = new object();
+    private float[] scopeBuffer = new float[2048];
+    private int scopeWriteIndex = 0;
+    private System.Collections.Generic.List<float> snapshot = new System.Collections.Generic.List<float>(4096);
+    private bool snapshotDone = false;
+
     void Start()
     {
         sampleRate = AudioSettings.outputSampleRate;
@@ -76,6 +86,15 @@ public class KickSynth : MonoBehaviour
 
         ampTotalSamples = riseSamples + fallSamples + bounceSamples + fadeOutSamples;
 
+        // Reset oscilloscope buffer and notify listeners for sync
+        lock (scopeLock)
+        {
+            scopeWriteIndex = 0;
+        }
+        snapshotDone = false;
+        snapshot.Clear();
+        onKickStart?.Invoke();
+
         playing = true;
     }
 
@@ -105,6 +124,12 @@ public class KickSynth : MonoBehaviour
                     data[i + ch] = 0f;
 
                 playing = false;
+                if (!snapshotDone)
+                {
+                    snapshotDone = true;
+                    var finalSnap = snapshot.ToArray();
+                    onKickComplete?.Invoke(finalSnap);
+                }
                 continue;
             }
 
@@ -149,9 +174,130 @@ public class KickSynth : MonoBehaviour
 
             float finalSample = sampleSum / oversample * volume;
 
+            // Store for oscilloscope (single channel snapshot)
+            lock (scopeLock)
+            {
+                scopeBuffer[scopeWriteIndex] = finalSample;
+                scopeWriteIndex = (scopeWriteIndex + 1) % scopeBuffer.Length;
+            }
+            if (!snapshotDone)
+            {
+                snapshot.Add(finalSample);
+            }
+
             // Write sample to all channels
             for (int ch = 0; ch < channels; ch++)
                 data[i + ch] = finalSample;
         }
+    }
+
+    /// <summary>
+    /// Copy the most recent audio samples into target. Returns number copied.
+    /// </summary>
+    public int CopyScopeData(float[] target)
+    {
+        if (target == null || target.Length == 0)
+            return 0;
+
+        lock (scopeLock)
+        {
+            int count = Mathf.Min(target.Length, scopeBuffer.Length);
+            int start = (scopeWriteIndex - count + scopeBuffer.Length) % scopeBuffer.Length;
+            for (int i = 0; i < count; i++)
+            {
+                target[i] = scopeBuffer[(start + i) % scopeBuffer.Length];
+            }
+            return count;
+        }
+    }
+
+    /// <summary>
+    /// Generate a full preview of the kick waveform using current parameters (offline),
+    /// resampled to a fixed output length for consistent drawing.
+    /// </summary>
+    public float[] GeneratePreviewWaveform(int outputSamples = 2048)
+    {
+        double sr = sampleRate > 0 ? sampleRate : AudioSettings.outputSampleRate;
+        if (sr <= 0) return System.Array.Empty<float>();
+
+        int oversample = 4;
+
+        double localPitchTotalSamples = (pitchSweepMs / 1000.0) * sr;
+
+        float totalStageMs = riseMs + fallMs + bounceMs;
+        float scale = ampDurationMs / Mathf.Max(1e-6f, totalStageMs);
+
+        double localRise = (riseMs * scale / 1000.0) * sr;
+        double localFall = (fallMs * scale / 1000.0) * sr;
+        double localBounce = (bounceMs * scale / 1000.0) * sr;
+        double localFade = (fadeOutMs / 1000.0) * sr;
+        double localAmpTotal = localRise + localFall + localBounce + localFade;
+
+        double localPhase = Mathf.PI / 2.0;
+        double localPitchSample = 0;
+        double localAmpSample = 0;
+        float localDip = Mathf.Pow(10f, dipLevelDb / 20f);
+
+        var list = new System.Collections.Generic.List<float>();
+        float previewAmpEnv = 0f; // local to avoid touching shared ampEnvelope
+
+        // Generate full waveform at oversampled resolution
+        while (localAmpSample < localAmpTotal)
+        {
+            float sampleSum = 0f;
+            for (int os = 0; os < oversample; os++)
+            {
+                float tPitch = (float)(localPitchSample / localPitchTotalSamples);
+                tPitch = Mathf.Clamp01(tPitch);
+                float tCurved = Mathf.Pow(tPitch, pitchCurve);
+                float freq = startFreq * Mathf.Pow(endFreq / startFreq, tCurved);
+
+                // Amplitude envelope
+                if (localAmpSample < localRise) // Attack
+                    previewAmpEnv = (float)(localAmpSample / localRise);
+                else if (localAmpSample < localRise + localFall) // Decay to dip
+                {
+                    float t = (float)((localAmpSample - localRise) / localFall);
+                    previewAmpEnv = Mathf.Lerp(1f, localDip, t);
+                }
+                else if (localAmpSample < localRise + localFall + localBounce) // Bounce back
+                {
+                    float t = (float)((localAmpSample - localRise - localFall) / localBounce);
+                    previewAmpEnv = Mathf.Lerp(localDip, 1f, t);
+                }
+                else // FadeOut / Release
+                {
+                    float t = (float)((localAmpSample - localRise - localFall - localBounce) / localFade);
+                    previewAmpEnv = Mathf.Lerp(1f, 0f, t);
+                }
+
+                sampleSum += Mathf.Sin((float)localPhase) * previewAmpEnv;
+
+                localPhase += (2.0 * Mathf.PI * freq) / (sr * oversample);
+                localPitchSample += 1.0 / oversample;
+                localAmpSample += 1.0 / oversample;
+            }
+
+            float finalSample = sampleSum / oversample * volume;
+            list.Add(finalSample);
+        }
+
+        // Resample to fixed output length
+        if (list.Count == 0 || outputSamples <= 1)
+            return new float[outputSamples > 0 ? outputSamples : 0];
+
+        var outArr = new float[outputSamples];
+        int srcCount = list.Count;
+        for (int i = 0; i < outputSamples; i++)
+        {
+            float t = (outputSamples == 1) ? 0f : i / (float)(outputSamples - 1);
+            float srcPos = t * (srcCount - 1);
+            int idx0 = Mathf.FloorToInt(srcPos);
+            int idx1 = Mathf.Min(idx0 + 1, srcCount - 1);
+            float frac = srcPos - idx0;
+            outArr[i] = Mathf.Lerp(list[idx0], list[idx1], frac);
+        }
+
+        return outArr;
     }
 }

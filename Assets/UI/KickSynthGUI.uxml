@@ -1,0 +1,19 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/KickSynthStyles.uss?fileID=7433441132597879392&amp;guid=fe4cc1834ba770242ad285ba59bdbcae&amp;type=3#KickSynthStyles"/>
+    <ui:VisualElement name="KickPanel" class="kick-panel">
+        <ui:Label name="PitchLabel" text="Pitch Curve" class="label"/>
+        <ui:VisualElement name="PitchKnob" class="knob">
+            <ui:VisualElement name="PitchKnobIndicator" class="knob-indicator"/>
+        </ui:VisualElement>
+        <ui:Label name="PitchSweepLabel" text="Pitch Sweep" class="label"/>
+        <ui:VisualElement name="PitchSweepKnob" class="knob">
+            <ui:VisualElement name="PitchSweepKnobIndicator" class="knob-indicator"/>
+        </ui:VisualElement>
+        <ui:Label name="ScopeLabel" text="Oscilloscope" class="label"/>
+        <ui:VisualElement name="ScopeContainer" class="oscilloscope">
+            <ui:Image name="ScopeImage" class="oscilloscope-image"/>
+        </ui:VisualElement>
+        <ui:Label name="VolumeLabel" text="Volume" class="label"/>
+        <ui:VisualElement name="VolumeSlider" class="slider"/>
+    </ui:VisualElement>
+</ui:UXML>
