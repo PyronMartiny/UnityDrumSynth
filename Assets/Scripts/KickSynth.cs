@@ -7,22 +7,22 @@ public class KickSynth : MonoBehaviour
     public System.Action<float[]> onKickComplete; // optional for snapshot consumers
 
     [Header("Kick Parameters")]
-    public float startFreq = 200f;       // Frequency at start of pitch sweep
-    public float endFreq = 40f;          // Frequency at end of pitch sweep
-    [Range(0.1f, 1.0f)] public float volume = 1.0f;          // Overall amplitude
+    [Range(400f, 22000f)] public float startFreq = 18000f;       // Frequency at start of pitch sweep
+    [Range(5f, 400f)] public float endFreq = 30f;          // Frequency at end of pitch sweep
+    [Range(0.1f, 1.0f)] public float volume = 0.8f;          // Overall amplitude
 
     [Header("Pitch Sweep")]
-    [Range(10f, 400f)] public float pitchSweepMs = 214.29f; // Duration of pitch sweep in ms
+    [Range(10f, 400f)] public float pitchSweepMs = 206f; // Duration of pitch sweep in ms
     [Range(0.1f, 0.5f)]
-    public float pitchCurve = 0.1f;        // >1 = steeper drop, <1 = slower
+    public float pitchCurve = 0.2f;        // >1 = steeper drop, <1 = slower
 
     [Header("Amplitude Envelope (ms/dB)")]
-    [Range(10f, 400f)] public float ampDurationMs = 180f;   // Main envelope duration (rise+fall+bounce)
-    [Range(0f, 20f)] public float riseMs = 5f;       // Attack
-    [Range(1, 100f)] public float fallMs = 20f;     // Decay to dip
+    [Range(10f, 400f)] public float ampDurationMs = 181f;   // Main envelope duration (rise+fall+bounce)
+    [Range(0f, 20f)] public float riseMs = 0f;       // Attack
+    [Range(1, 100f)] public float fallMs = 19f;     // Decay to dip
     [Range(-24f, 0f)] public float dipLevelDb = -12f;// Dip level in dB
-    [Range(1f, 100f)] public float bounceMs = 50f;   // Bounce back to full
-    [Range(5f, 200f)] public float fadeOutMs = 50f;  // Release (fade out at end)
+    [Range(1f, 100f)] public float bounceMs = 81f;   // Bounce back to full
+    [Range(5f, 200f)] public float fadeOutMs = 18f;  // Release (fade out at end)
 
     [Header("Debug Trigger")]
     public bool triggerKickButton = false; // Inspector button to test

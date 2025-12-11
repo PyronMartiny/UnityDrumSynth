@@ -13,7 +13,7 @@ public class Oscilloscope : MonoBehaviour
     public Color background = new Color(0.08f, 0.08f, 0.08f, 1f);
     public Color lineColor = new Color(0f, 0.9f, 0.4f, 1f);
     public Color midLineColor = new Color(0f, 0f, 0f, 0.4f);
-    public float refreshInterval = 0.1f; // seconds between preview redraws
+    public float refreshInterval = 0.1f;
 
     private Texture2D texture;
     private Image image;
@@ -21,40 +21,59 @@ public class Oscilloscope : MonoBehaviour
     private Color[] clearPixels;
     private bool pendingClear = true;
     private float refreshTimer = 0f;
+    private bool bound = false;
+    private bool subscribed = false;
 
     void OnEnable()
     {
-        uiDocument.rootVisualElement.RegisterCallback<AttachToPanelEvent>(evt =>
-        {
-            image = uiDocument.rootVisualElement.Q<Image>(imageName);
-            if (image == null)
-            {
-                Debug.LogError($"{name}: Could not find Image named '{imageName}' in UI document.", this);
-                return;
-            }
-
-            CreateTexture();
-        });
-
-        if (kickSynth != null)
-        {
-            kickSynth.onKickStart += HandleKickStart;
-            kickSynth.onKickComplete += HandleKickComplete;
-        }
+        TryBind();
+        if (uiDocument != null && uiDocument.rootVisualElement != null)
+            uiDocument.rootVisualElement.RegisterCallback<AttachToPanelEvent>(_ => TryBind());
     }
 
     void OnDisable()
     {
-        if (kickSynth != null)
+        if (kickSynth != null && subscribed)
         {
             kickSynth.onKickStart -= HandleKickStart;
             kickSynth.onKickComplete -= HandleKickComplete;
+            subscribed = false;
         }
         if (texture != null)
         {
             Destroy(texture);
             texture = null;
         }
+        bound = false;
+    }
+
+    private void TryBind()
+    {
+        if (bound)
+            return;
+
+        var root = uiDocument != null ? uiDocument.rootVisualElement : null;
+        if (root == null)
+            return;
+
+        image = root.Q<Image>(imageName);
+        if (image == null)
+            return;
+
+        CreateTexture();
+        image.style.width = textureWidth;
+        image.style.height = textureHeight;
+        image.scaleMode = ScaleMode.StretchToFill;
+
+        if (kickSynth != null && !subscribed)
+        {
+            kickSynth.onKickStart += HandleKickStart;
+            kickSynth.onKickComplete += HandleKickComplete;
+            subscribed = true;
+        }
+
+        bound = true;
+        Debug.Log($"{name}: Oscilloscope bound to '{imageName}'", this);
     }
 
     void HandleKickStart()
@@ -64,19 +83,20 @@ public class Oscilloscope : MonoBehaviour
 
     void HandleKickComplete(float[] data)
     {
-        // Not used for preview, but kept for compatibility if needed later
     }
 
     void CreateTexture()
     {
         texture = new Texture2D(textureWidth, textureHeight, TextureFormat.RGBA32, false);
         texture.wrapMode = TextureWrapMode.Clamp;
+
         clearPixels = new Color[textureWidth * textureHeight];
         for (int i = 0; i < clearPixels.Length; i++)
             clearPixels[i] = background;
 
         texture.SetPixels(clearPixels);
         texture.Apply(false);
+
         if (image != null)
             image.image = texture;
     }
@@ -86,12 +106,14 @@ public class Oscilloscope : MonoBehaviour
         if (kickSynth == null || texture == null || image == null)
             return;
 
+        if (!bound)
+            TryBind();
+
         refreshTimer += Time.deltaTime;
         if (refreshTimer < refreshInterval)
             return;
         refreshTimer = 0f;
 
-        // Request fixed-length preview so width maps 1:1 start-to-end
         var preview = kickSynth.GeneratePreviewWaveform(textureWidth);
         if (preview == null || preview.Length == 0)
             return;
@@ -110,7 +132,6 @@ public class Oscilloscope : MonoBehaviour
         if (count < 2)
             return;
 
-        // Clear to background
         texture.SetPixels(clearPixels);
 
         int w = textureWidth;
@@ -118,14 +139,10 @@ public class Oscilloscope : MonoBehaviour
         float midY = (h - 1) * 0.5f;
         float amp = h * 0.45f;
 
-        // Draw mid line
         int midRow = Mathf.RoundToInt(midY);
         for (int x = 0; x < w; x++)
-        {
             texture.SetPixel(x, midRow, midLineColor);
-        }
 
-        // Resample the entire waveform to exactly fit the width
         float prevY = midY - Mathf.Clamp(samples[0], -1f, 1f) * amp;
         for (int x = 1; x < w; x++)
         {
@@ -139,7 +156,6 @@ public class Oscilloscope : MonoBehaviour
         texture.Apply(false);
     }
 
-    // Simple Bresenham line
     private void DrawLine(int x0, int y0, int x1, int y1, Color color)
     {
         int dx = Mathf.Abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
@@ -157,4 +173,3 @@ public class Oscilloscope : MonoBehaviour
         }
     }
 }
-

@@ -67,7 +67,7 @@
 
 .oscilloscope {
     width: 1040px;
-    height: 160px;
+    height: 320px;
     padding: 8px;
     background-color: #111;
     border-width: 1px;
@@ -79,7 +79,7 @@
 
 .oscilloscope-image {
     width: 1024px;
-    height: 128px;
+    height: 256px;
     background-color: #080808;
 }
 
@@ -93,6 +93,7 @@
     width: 100%;
     padding-left: 10%;
     padding-right: 10%;
+    margin-top: 40px;
 }
 
 .fader-column {
@@ -105,5 +106,29 @@
 }
 
 .fader-column .label {
+    margin-bottom: 6px;
+}
+
+.knob-row {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-evenly;
+    width: 100%;
+    padding-left: 10%;
+    padding-right: 10%;
+    margin-top: 20px;
+}
+
+.knob-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1 1 0;
+    min-width: 0;
+    margin-top: 30px;
+}
+
+.knob-column .label {
     margin-bottom: 6px;
 }

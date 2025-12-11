@@ -363,6 +363,8 @@ GameObject:
   - component: {fileID: 733724347}
   - component: {fileID: 733724346}
   - component: {fileID: 733724349}
+  - component: {fileID: 733724359}
+  - component: {fileID: 733724358}
   - component: {fileID: 733724350}
   - component: {fileID: 733724351}
   - component: {fileID: 733724352}
@@ -395,6 +397,8 @@ MonoBehaviour:
   kickSynth: {fileID: 40883957}
   controlPitchCurve: 1
   controlPitchSweepMs: 0
+  controlStartFreq: 0
+  controlEndFreq: 0
   value: 0
 --- !u!114 &733724347
 MonoBehaviour:
@@ -451,6 +455,8 @@ MonoBehaviour:
   kickSynth: {fileID: 40883957}
   controlPitchCurve: 0
   controlPitchSweepMs: 1
+  controlStartFreq: 0
+  controlEndFreq: 0
   value: 0
 --- !u!114 &733724350
 MonoBehaviour:
@@ -468,7 +474,7 @@ MonoBehaviour:
   imageName: ScopeImage
   kickSynth: {fileID: 40883957}
   textureWidth: 1024
-  textureHeight: 128
+  textureHeight: 256
   background: {r: 0.08, g: 0.08, b: 0.08, a: 1}
   lineColor: {r: 1, g: 0.8313726, b: 0, a: 1}
   midLineColor: {r: 0.078431375, g: 0.078431375, b: 0.078431375, a: 1}
@@ -634,6 +640,46 @@ MonoBehaviour:
   controlFadeOutMs: 0
   controlVolume: 0
   value: 0
+--- !u!114 &733724358
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 733724345}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87157be6e17727e49a229c7f86d9970c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Knob
+  uiDocument: {fileID: 733724347}
+  knobName: EndFreqKnob
+  kickSynth: {fileID: 40883957}
+  controlPitchCurve: 0
+  controlPitchSweepMs: 0
+  controlStartFreq: 0
+  controlEndFreq: 1
+  value: 0
+--- !u!114 &733724359
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 733724345}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87157be6e17727e49a229c7f86d9970c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Knob
+  uiDocument: {fileID: 733724347}
+  knobName: StartFreqKnob
+  kickSynth: {fileID: 40883957}
+  controlPitchCurve: 0
+  controlPitchSweepMs: 0
+  controlStartFreq: 1
+  controlEndFreq: 0
+  value: 0
 --- !u!1001 &8950805665984512921
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -648,31 +694,47 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5156960162136137786, guid: 0133a28473110814087e7ce9133c4d44, type: 3}
       propertyPath: fallMs
-      value: 33.3
+      value: 19
       objectReference: {fileID: 0}
     - target: {fileID: 5156960162136137786, guid: 0133a28473110814087e7ce9133c4d44, type: 3}
       propertyPath: riseMs
-      value: 9
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5156960162136137786, guid: 0133a28473110814087e7ce9133c4d44, type: 3}
       propertyPath: volume
-      value: 0.772
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5156960162136137786, guid: 0133a28473110814087e7ce9133c4d44, type: 3}
+      propertyPath: endFreq
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5156960162136137786, guid: 0133a28473110814087e7ce9133c4d44, type: 3}
       propertyPath: bounceMs
-      value: 56.1
+      value: 81
       objectReference: {fileID: 0}
     - target: {fileID: 5156960162136137786, guid: 0133a28473110814087e7ce9133c4d44, type: 3}
       propertyPath: fadeOutMs
-      value: 111
+      value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 5156960162136137786, guid: 0133a28473110814087e7ce9133c4d44, type: 3}
+      propertyPath: startFreq
+      value: 18000
       objectReference: {fileID: 0}
     - target: {fileID: 5156960162136137786, guid: 0133a28473110814087e7ce9133c4d44, type: 3}
       propertyPath: dipLevelDb
-      value: -11.6
+      value: -12
+      objectReference: {fileID: 0}
+    - target: {fileID: 5156960162136137786, guid: 0133a28473110814087e7ce9133c4d44, type: 3}
+      propertyPath: pitchCurve
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5156960162136137786, guid: 0133a28473110814087e7ce9133c4d44, type: 3}
+      propertyPath: pitchSweepMs
+      value: 206
       objectReference: {fileID: 0}
     - target: {fileID: 5156960162136137786, guid: 0133a28473110814087e7ce9133c4d44, type: 3}
       propertyPath: ampDurationMs
-      value: 400
+      value: 181
       objectReference: {fileID: 0}
     - target: {fileID: 8407935305154247387, guid: 0133a28473110814087e7ce9133c4d44, type: 3}
       propertyPath: m_LocalPosition.x

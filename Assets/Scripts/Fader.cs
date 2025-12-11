@@ -19,9 +19,11 @@ public class Fader : MonoBehaviour
     [Range(0f, 1f)]
     public float value = 0f;
 
+    private VisualElement root;
     private VisualElement fader;
     private VisualElement crossbar;
     private VisualElement hitArea;
+    private bool bound = false;
     private bool dragging = false;
     private float startDragY;
     private float startValue;
@@ -69,63 +71,77 @@ public class Fader : MonoBehaviour
 
     void OnEnable()
     {
-        uiDocument.rootVisualElement.RegisterCallback<AttachToPanelEvent>(evt =>
+        TryBind();
+        if (uiDocument != null && uiDocument.rootVisualElement != null)
+            uiDocument.rootVisualElement.RegisterCallback<AttachToPanelEvent>(_ => TryBind());
+    }
+
+    void Update()
+    {
+        if (!bound)
+            TryBind();
+    }
+
+    private void TryBind()
+    {
+        if (bound)
+            return;
+
+        root = uiDocument != null ? uiDocument.rootVisualElement : null;
+        if (root == null)
+            return;
+
+        fader = root.Q<VisualElement>(faderName);
+        if (fader == null)
+            return;
+
+        fader.pickingMode = PickingMode.Position;
+
+        // Find crossbar and hit area for sliders
+        if (fader.ClassListContains("slider"))
         {
-            fader = uiDocument.rootVisualElement.Q<VisualElement>(faderName);
-            if (fader == null)
+            hitArea = fader.Q<VisualElement>(className: "slider-hit-area");
+            if (hitArea != null)
             {
-                Debug.LogError($"{name}: Could not find fader named '{faderName}' in the UI document. Check faderName and UXML element name.", this);
-                return;
+                crossbar = hitArea.Q<VisualElement>(className: "slider-crossbar");
+                hitArea.pickingMode = PickingMode.Position;
+                hitArea.RegisterCallback<PointerDownEvent>(OnHitAreaDown);
+                hitArea.RegisterCallback<PointerUpEvent>(OnHitAreaUp);
+                hitArea.RegisterCallback<PointerMoveEvent>(OnHitAreaMove);
             }
-            fader.pickingMode = PickingMode.Position;
-
-            // Find crossbar and hit area for sliders
-            if (fader.ClassListContains("slider"))
+            else
             {
-                hitArea = fader.Q<VisualElement>(className: "slider-hit-area");
-                if (hitArea != null)
-                {
-                    crossbar = hitArea.Q<VisualElement>(className: "slider-crossbar");
-                    // Make hit area draggable
-                    hitArea.pickingMode = PickingMode.Position;
-                    hitArea.RegisterCallback<PointerDownEvent>(OnHitAreaDown);
-                    hitArea.RegisterCallback<PointerUpEvent>(OnHitAreaUp);
-                    hitArea.RegisterCallback<PointerMoveEvent>(OnHitAreaMove);
-                }
-                else
-                {
-                    // Fallback to crossbar if no hit area
-                    crossbar = fader.Q<VisualElement>(className: "slider-crossbar");
-                }
+                crossbar = fader.Q<VisualElement>(className: "slider-crossbar");
             }
+        }
 
-            fader.RegisterCallback<PointerDownEvent>(OnPointerDown);
-            fader.RegisterCallback<PointerUpEvent>(OnPointerUp);
-            fader.RegisterCallback<PointerMoveEvent>(OnPointerMove);
+        fader.RegisterCallback<PointerDownEvent>(OnPointerDown);
+        fader.RegisterCallback<PointerUpEvent>(OnPointerUp);
+        fader.RegisterCallback<PointerMoveEvent>(OnPointerMove);
 
-            // Initialize value from synth if available
-            if (kickSynth != null)
-            {
-                if (controlVolume)
-                    value = Mathf.InverseLerp(0.1f, 1.0f, kickSynth.volume);
-                else if (controlAmpDurationMs)
-                    value = Mathf.InverseLerp(10f, 400f, kickSynth.ampDurationMs);
-                else if (controlRiseMs)
-                    value = Mathf.InverseLerp(0f, 20f, kickSynth.riseMs);
-                else if (controlFallMs)
-                    value = Mathf.InverseLerp(1f, 100f, kickSynth.fallMs);
-                else if (controlDipLevelDb)
-                    value = Mathf.InverseLerp(-24f, 0f, kickSynth.dipLevelDb);
-                else if (controlBounceMs)
-                    value = Mathf.InverseLerp(1f, 100f, kickSynth.bounceMs);
-                else if (controlFadeOutMs)
-                    value = Mathf.InverseLerp(5f, 200f, kickSynth.fadeOutMs);
-            }
+        // Initialize value from synth if available
+        if (kickSynth != null)
+        {
+            if (controlVolume)
+                value = Mathf.InverseLerp(0.1f, 1.0f, kickSynth.volume);
+            else if (controlAmpDurationMs)
+                value = Mathf.InverseLerp(10f, 400f, kickSynth.ampDurationMs);
+            else if (controlRiseMs)
+                value = Mathf.InverseLerp(0f, 20f, kickSynth.riseMs);
+            else if (controlFallMs)
+                value = Mathf.InverseLerp(1f, 100f, kickSynth.fallMs);
+            else if (controlDipLevelDb)
+                value = Mathf.InverseLerp(-24f, 0f, kickSynth.dipLevelDb);
+            else if (controlBounceMs)
+                value = Mathf.InverseLerp(1f, 100f, kickSynth.bounceMs);
+            else if (controlFadeOutMs)
+                value = Mathf.InverseLerp(5f, 200f, kickSynth.fadeOutMs);
+        }
 
-            // Schedule update after layout is calculated
-            fader.RegisterCallback<GeometryChangedEvent>(OnGeometryChanged);
-            UpdateVisual();
-        });
+        fader.RegisterCallback<GeometryChangedEvent>(OnGeometryChanged);
+        UpdateVisual();
+        bound = true;
+        Debug.Log($"{name}: Fader bound to '{faderName}'", this);
     }
 
     void OnPointerDown(PointerDownEvent evt)
